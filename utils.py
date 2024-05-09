@@ -48,11 +48,10 @@ def all_(data) -> None:
         print('Укажите месяц цифрой от 1 до 12')
         month = input()
     else:
-
         line()
         all_ops = Transaction.get_all()
         summ_ = sum(tr[1].amount for tr in all_ops if tr[1].date.split('-')[1].lstrip('0') == month and tr[1].category == operation)
-        print(f'Все {operation} в {MONTHS.get(month)} - {summ_} рублей')
+        print(f'Все {CONSTANTS.get(operation)} в {MONTHS.get(month)} - {summ_} рублей')
         line()
         input('Нажми Enter для продолжения')
 
@@ -62,12 +61,10 @@ def add(data: str) -> None:
     Добавляет новую транзакцию
     """
     amount, description = ('', '')
-    while not amount.isdigit() and description.isalpha():
+    while not amount.isdigit() and not description.isalpha():
         print('Укажите сумму цифрой, описание текстом')
         amount, description = input('Сумма, описание: ').split(', ')
     else:
-        if ' ' in description:
-            description = '_'.join(description.split())
         t = Transaction(
             date=datetime.datetime.now().strftime('%d-%m-%Y'),
             category=CONSTANTS.get(data),
@@ -97,7 +94,7 @@ def change() -> None:
             amount=amount_,
             description=description_
         )
-        tr.save_with_change(data, int(i), int(amount))
+        tr.save_with_change(int(i), int(amount))
 
 
 def search() -> None:
@@ -115,7 +112,6 @@ def search() -> None:
         '3 - Сумма\n'
     )
     else:
-        print(('\t'*2).join(['Категория', 'id', 'Дата', 'сумма', 'описание']))
         line()
         if answ == '1':
             by_category()
@@ -143,7 +139,9 @@ def by_category() -> None:
         line()
         for i, tr in all_ops:
             print(('\t'*2).join([tr.category, str(i), tr.date, str(tr.amount), tr.description]))
-        change()
+        inp = input('Для изменения транзакций нажмите 1 для продолжения нажмите любую клавишу')
+        if inp == '1':
+            change()
 
 
 def by_date() -> None:
@@ -160,7 +158,9 @@ def by_date() -> None:
         line()
         for i, tr in all_ops:
             print('\t\t'.join([tr.category, str(i), tr.date, str(tr.amount), tr.description]))
-        change(data)
+        inp = input('Для изменения транзакций нажмите 1 для продолжения нажмите любую клавишу')
+        if inp == '1':
+            change()
 
 
 def by_amount() -> None:
@@ -170,12 +170,14 @@ def by_amount() -> None:
     amount = ''
     while not amount.isdigit():
         print('Укажите сумму цыфрами')
-        amount = int(input('Сумма\n'))
+        amount = input('Сумма\n')
     else:
         all_ops = Transaction.get_all()
-        all_ops = [tr for tr in all_ops if amount == tr[1].amount]
+        all_ops = [tr for tr in all_ops if amount == str(tr[1].amount)]
         print(('\t'*2).join(['Категория', 'id', 'Дата', 'сумма', 'описание']))
         line()
         for i, tr in all_ops:
             print(('\t'*2).join([tr.category, str(i), tr.date, str(tr.amount), tr.description]))
-        change(data)
+        inp = input('Для изменения транзакций нажмите 1 для продолжения нажмите любую клавишу')
+        if inp == '1':
+            change()

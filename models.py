@@ -17,6 +17,8 @@ class Transaction:
         month = self.date.split('-')[1].lstrip('0')
         with open('data.json', 'r') as f:
             data = json.load(f)
+        if ' ' in self.description:
+            self.description = '_'.join(self.description.split())
         if self.category == 'income':
             data['balance'] += self.amount
         else:
@@ -38,16 +40,20 @@ class Transaction:
         with open('data.json', 'w') as f:
             f.write(json.dumps(data))
 
-    def save_with_change(self, data: dict, i: int, pre_amount: int) -> None:
+    def save_with_change(self, i: int, pre_amount: int) -> None:
         """
         Сохраняет изменения записанной транзакции.
         """
+        with open('data.json', 'r') as f:
+            data = json.load(f)
         if self.category == 'income':
             data['balance'] -= pre_amount
             data['balance'] += self.amount
         else:
             data['balance'] += pre_amount
             data['balance'] -= self.amount
+        if ' ' in self.description:
+            self.description = '_'.join(self.description.split())
         month = self.date.split('-')[1].lstrip('0')
         data.get(self.category).get(month).get(self.date)[i]['amount'] = self.amount
         data.get(self.category).get(month).get(self.date)[i]['description'] = self.description
@@ -83,8 +89,8 @@ class Transaction:
         with open('data.json', 'r') as f:
             data = json.load(f)
         try:
-            a, d = data.get(category).get(date.split('-')[1].lstrip('0')).get(date)[i].volumes()
-            if a == amount and d == description:
+            a, d = data.get(category).get(date.split('-')[1].lstrip('0')).get(date)[int(i)].values()
+            if a == int(amount) and d == description:
                 tr = Transaction(
                     category=category,
                     date=date,
